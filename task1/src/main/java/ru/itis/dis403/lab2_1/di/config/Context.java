@@ -110,15 +110,4 @@ public class Context {
             }
         }
     }
-
-    // Внутренний класс для хранения обработчика
-    public static class Handler {
-        public final Object controller;
-        public final Method method;
-
-        public Handler(Object controller, Method method) {
-            this.controller = controller;
-            this.method = method;
-        }
-    }
 }
