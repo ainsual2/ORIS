@@ -13,7 +13,13 @@ public class IndexController {
 
     @GetMapping("/index")
     public void getIndex(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.getWriter().write("INDEX PAGE");
+        resp.setContentType("text/html; charset=utf-8");
+        PrintWriter out = resp.getWriter();
+        out.println("<html><body>");
+        out.println("<h1>Главная страница (Index)</h1>");
+        out.println("<p>Добро пожаловать в домашнее приложение!</p>");
+        out.println("<a href='/home'>Перейти на Home</a>");
+        out.println("</body></html>");
     }
 
     @GetMapping("/")
