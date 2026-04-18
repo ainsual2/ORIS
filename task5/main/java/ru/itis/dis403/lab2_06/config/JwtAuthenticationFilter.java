@@ -26,35 +26,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String username;
 
+        // 1. Проверяем, есть ли заголовок и начинается ли он с "Bearer "
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            // Если токена нет, просто пропускаем фильтр дальше (цепочку)
             filterChain.doFilter(request, response);
-            System.out.println("doFilter unauth");
             return;
         }
 
-        final String jwt = authHeader.substring(7);
-        final String username = jwtService.extractUsername(jwt);
+        try {
+            // 2. Извлекаем токен (убираем "Bearer ")
+            jwt = authHeader.substring(7);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            // 3. Извлекаем имя пользователя из токена
+            username = jwtService.extractUsername(jwt);
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+            // 4. Если имя есть и в контексте безопасности еще никого нет
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                // 5. Валидируем токен
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
-        }
 
-        filterChain.doFilter(request, response);
+            // Продолжаем цепочку фильтров
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            // ЛОВИМ ВСЕ ОШИБКИ JWT (неверный формат, истек срок, слабый ключ и т.д.)
+            // И просто пропускаем запрос дальше, не ломая приложение
+            filterChain.doFilter(request, response);
+        }
 
     }
 }
