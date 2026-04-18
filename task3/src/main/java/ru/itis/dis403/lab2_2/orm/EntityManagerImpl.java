@@ -33,7 +33,7 @@ public class EntityManagerImpl implements EntityManager, AutoCloseable {
 
         String tableName = getTableName(clazz);
         Field idField = getIdField(clazz);
-        idField.setAccessible(true);  // <-- ВАЖНО:设置 accessible сразу
+        idField.setAccessible(true);
 
         try {
             Object idValue = idField.get(entity);
@@ -122,7 +122,6 @@ public class EntityManagerImpl implements EntityManager, AutoCloseable {
 
         List<Object> params = new ArrayList<>();
 
-        // ---- В методе update(...) при сборе params ----
         for (Field field : columns) {
             if (field.isAnnotationPresent(Id.class)) {
                 continue;
@@ -172,7 +171,7 @@ public class EntityManagerImpl implements EntityManager, AutoCloseable {
         Field idField = getIdField(clazz);
 
         try {
-            idField.setAccessible(true);  // <-- ВАЖНО
+            idField.setAccessible(true);
             Object idValue = idField.get(entity);
 
             String sql = "DELETE FROM " + tableName + " WHERE id = ?";
@@ -283,7 +282,6 @@ public class EntityManagerImpl implements EntityManager, AutoCloseable {
         try {
             T entity = entityType.getDeclaredConstructor().newInstance();
 
-            // ---- В методе mapResultSetToEntity(...) заменяем поведение при ManyToOne ----
             for (Field field : entityType.getDeclaredFields()) {
                 if (field.isAnnotationPresent(Column.class) ||
                         field.isAnnotationPresent(Id.class) ||

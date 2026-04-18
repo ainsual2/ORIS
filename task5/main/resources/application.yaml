@@ -1,0 +1,33 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /
+
+jwt:
+  secret: topsecket    # Убедитесь, что ключ достаточно длинный для алгоритма HS256
+  expiration: 86400000
+
+spring:
+  # Настройки БД
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5437/labs
+    username: postgres
+    password: '123' # Лучше в кавычках, чтобы избежать проблем с типами данных
+
+  # Настройки Hibernate/JPA (ЭТОГО НЕ ХВАТАЛО)
+  jpa:
+    hibernate:
+      ddl-auto: update # Создаст таблицы автоматически при запуске
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  freemarker:
+    suffix: .ftlh
+    template-loader-path: classpath:/templates
+    request-context-attribute: rc
+
+  mvc:
+    static-path-pattern: /static/**
