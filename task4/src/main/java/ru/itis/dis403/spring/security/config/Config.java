@@ -44,7 +44,7 @@ public class Config {
         vendorAdapter.setDatabase(Database.POSTGRESQL);
         entityManagerFactory.setJpaVendorAdapter(vendorAdapter);
 
-        entityManagerFactory.setPackagesToScan("ru.itis.dis403.spring.jpa.entity");
+        entityManagerFactory.setPackagesToScan("ru.itis.dis403.spring.security.model");
 
         Properties p = addProperties();
         entityManagerFactory.setJpaProperties(p);
