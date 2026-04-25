@@ -21,7 +21,7 @@
     <br/>
 
     <label>Или добавьте новый:</label>
-    <input type="text" name="newPhone" placeholder="+7..."/>
+    <input type="text" name="newPhones" placeholder="+7..."/>
     <br/><br/>
 
     <button type="submit">Сохранить</button>

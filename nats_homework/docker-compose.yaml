@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+
+  nats:
+    image: nats:latest
+    container_name: nats-broker
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: ["--http_port", "8222"]
+
+  weather-publisher:
+    build: ./weather-publisher
+    container_name: weather-publisher
+    environment:
+      NATS_URL: nats://nats:4222
+    depends_on:
+      - nats
+    restart: on-failure
+
+  weather-service:
+    build: ./weather-service
+    container_name: weather-service
+    environment:
+      NATS_URL: nats://nats:4222
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nats
+    restart: on-failure
+
+networks:
+  default:
+    name: weather-network

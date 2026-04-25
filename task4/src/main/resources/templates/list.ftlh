@@ -21,7 +21,7 @@
                 <td>
                     <#if p.phones?has_content>
                         <#list p.phones as ph>
-                            ${ph?string} <br/>
+                            ${ph.number!'-'} <br/>
                         </#list>
                     <#else>
                         -

@@ -1,0 +1,5 @@
+server:
+  port: 8080
+
+nats:
+  url: ${NATS_URL:nats://localhost:4222}
