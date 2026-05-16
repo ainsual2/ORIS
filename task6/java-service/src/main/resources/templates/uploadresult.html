@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная страница</title>
+</head>
+<body>
+<h2>Картинки</h2>
+<a th:href="@{/showimg}">Показать картинки</a>
+
+<div th:each="img : ${imgs}" >
+    <img th:src="'data:image/jpeg;base64,' + ${img}" />
+</div>
+
+<div th:each="img : ${imgs2}">
+    <img th:src="'data:image/jpeg;base64,' + ${img}" />
+</div>
+
+</body>
+</html>

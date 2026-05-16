@@ -13,17 +13,16 @@ public class MachineStatusRestController {
     private final MachineStatusService service;
 
     @GetMapping("/api/status/{id}")
-    public ResponseEntity<MachineStatus> getMachineStatus(
-            @PathVariable("id") Integer id
-    ) {
+    public ResponseEntity<MachineStatus> getMachineStatus(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(service.getStatus(id));
     }
 
     @PostMapping("/api/resource")
-    public ResponseEntity<String> getResource(
-            @RequestParam("resource") Double resource, @RequestParam("id") Integer id
+    public ResponseEntity<String> setResource(
+            @RequestParam("resource") Double resource,
+            @RequestParam("id") Integer id
     ) {
+        service.updateResource(id, resource);
         return ResponseEntity.ok("{\"status\":\"success\"}");
     }
-
 }

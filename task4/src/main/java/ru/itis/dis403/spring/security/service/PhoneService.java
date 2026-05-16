@@ -30,4 +30,7 @@ public class PhoneService {
     public List<Phone> getPhoneLike(String num) {
         return phoneRepository.getPhoneLike(num);
     }
+    public Phone findByNumber(String number) {
+        return phoneRepository.findByNumber(number);
+    }
 }

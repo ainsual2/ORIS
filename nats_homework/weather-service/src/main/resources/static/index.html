@@ -2,110 +2,291 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Dashboard</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: sans-serif;
-            background: #f4f4f4;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            background: #0a0a1a;
+            overflow: hidden;
         }
+
+        /* ── animated gradient background ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: -50%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(56, 100, 210, .25) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(131, 56, 236, .2) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(236, 72, 153, .15) 0%, transparent 50%);
+            animation: drift 12s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes drift {
+            0%   { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(40px, -30px) rotate(3deg); }
+        }
+
+        /* ── card ── */
         .card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem 2.5rem;
-            min-width: 340px;
-            border: 0.5px solid #e0e0e0;
+            position: relative;
+            z-index: 1;
+            width: 420px;
+            background: rgba(255, 255, 255, .06);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 24px;
+            padding: 2rem 2.2rem 1.6rem;
+            color: #fff;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, .4),
+                inset 0 1px 0 rgba(255, 255, 255, .06);
         }
+
+        /* ── header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.8rem;
+        }
+
+        .city-group { display: flex; flex-direction: column; gap: 4px; }
+
+        .city-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .4);
+        }
+
         .city {
-            font-size: 22px;
-            font-weight: 500;
-            margin-bottom: 1.5rem;
-            color: #111;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -.3px;
+            background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,.6));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, .45);
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 20px;
+            padding: 5px 12px;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 8px rgba(52, 211, 153, .6);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%      { opacity: .5; transform: scale(.85); }
+        }
+
+        /* ── main temp row ── */
+        .temp-row {
+            display: flex;
+            align-items: baseline;
             gap: 12px;
+            margin-bottom: 2rem;
         }
-        .metric {
-            background: #f7f7f5;
-            border-radius: 8px;
-            padding: 12px 16px;
+
+        .temp-big {
+            font-size: 64px;
+            font-weight: 300;
+            letter-spacing: -3px;
+            line-height: 1;
+            color: #fff;
         }
-        .metric-label {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 4px;
-        }
-        .metric-value {
+
+        .temp-big .unit {
             font-size: 24px;
-            font-weight: 500;
-            color: #111;
-        }
-        .metric-unit {
-            font-size: 14px;
-            color: #aaa;
+            font-weight: 400;
+            color: rgba(255, 255, 255, .4);
+            letter-spacing: 0;
+            vertical-align: super;
             margin-left: 2px;
         }
-        .footer {
-            margin-top: 1.5rem;
+
+        .temp-desc {
+            font-size: 14px;
+            color: rgba(255, 255, 255, .35);
+            font-weight: 400;
+        }
+
+        /* ── divider ── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);
+            margin-bottom: 1.6rem;
+        }
+
+        /* ── metrics grid ── */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .metric {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 14px;
+            padding: 14px 16px;
+            transition: background .3s, transform .3s;
+        }
+
+        .metric:hover {
+            background: rgba(255, 255, 255, .08);
+            transform: translateY(-2px);
+        }
+
+        .metric-icon {
+            font-size: 18px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, .35);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .9);
+        }
+
+        .metric-unit {
             font-size: 12px;
-            color: #bbb;
-            text-align: right;
+            font-weight: 400;
+            color: rgba(255, 255, 255, .3);
+            margin-left: 2px;
         }
-        .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #4caf50;
-            margin-right: 6px;
-            animation: pulse 1s infinite;
+
+        /* ── footer ── */
+        .footer {
+            margin-top: 1.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: rgba(255, 255, 255, .25);
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+
+        .footer .sep { opacity: .4; }
+
+        .error {
+            margin-top: 1rem;
+            padding: 10px 14px;
+            background: rgba(239, 68, 68, .1);
+            border: 1px solid rgba(239, 68, 68, .2);
+            border-radius: 10px;
+            color: #f87171;
+            font-size: 13px;
         }
-        .error { color: #e24b4a; font-size: 14px; margin-top: 1rem; }
+
+        /* ── subtle fade-in on load ── */
+        .card { animation: fadeUp .6s ease-out both; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
+
 <div class="card">
-    <div class="city" id="city">—</div>
+    <!-- Header -->
+    <div class="header">
+        <div class="city-group">
+            <span class="city-label">Город</span>
+            <span class="city" id="city">—</span>
+        </div>
+        <div class="status-badge">
+            <span class="dot"></span>
+            live
+        </div>
+    </div>
+
+    <!-- Big temperature -->
+    <div class="temp-row">
+        <div class="temp-big" id="temp">—<span class="unit">°C</span></div>
+        <div class="temp-desc">температура воздуха</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Metrics -->
     <div class="grid">
         <div class="metric">
-            <div class="metric-label">Температура</div>
-            <div class="metric-value" id="temp">—<span class="metric-unit">°C</span></div>
-        </div>
-        <div class="metric">
+            <span class="metric-icon">🌡</span>
             <div class="metric-label">Давление</div>
-            <div class="metric-value" id="pressure">—<span class="metric-unit">мм рт.ст.</span></div>
+            <div class="metric-value" id="pressure">—<span class="metric-unit">мм</span></div>
         </div>
         <div class="metric">
-            <div class="metric-label">Скорость ветра</div>
+            <span class="metric-icon">💨</span>
+            <div class="metric-label">Ветер</div>
             <div class="metric-value" id="windSpeed">—<span class="metric-unit">м/с</span></div>
         </div>
         <div class="metric">
+            <span class="metric-icon">🧭</span>
             <div class="metric-label">Направление</div>
             <div class="metric-value" id="windDir">—</div>
         </div>
     </div>
+
     <div class="error" id="error"></div>
+
     <div class="footer">
-        <span class="dot"></span>обновляется каждую секунду &nbsp;|&nbsp; <span id="time">—</span>
+        <span>обновление каждую секунду</span>
+        <span><span class="sep">|</span>&nbsp;&nbsp;<span id="time">—</span></span>
     </div>
 </div>
 
 <script>
     function update(data) {
         document.getElementById('city').textContent = data.city ?? '—';
-        document.getElementById('temp').innerHTML = (data.temp?.toFixed(1) ?? '—') + '<span class="metric-unit"> °C</span>';
-        document.getElementById('pressure').innerHTML = (data.pressure?.toFixed(1) ?? '—') + '<span class="metric-unit"> мм рт.ст.</span>';
-        document.getElementById('windSpeed').innerHTML = (data.windSpeed?.toFixed(1) ?? '—') + '<span class="metric-unit"> м/с</span>';
+
+        document.getElementById('temp').innerHTML =
+            (data.temp?.toFixed(1) ?? '—') + '<span class="unit">°C</span>';
+
+        document.getElementById('pressure').innerHTML =
+            (data.pressure?.toFixed(1) ?? '—') + '<span class="metric-unit"> мм</span>';
+
+        document.getElementById('windSpeed').innerHTML =
+            (data.windSpeed?.toFixed(1) ?? '—') + '<span class="metric-unit"> м/с</span>';
+
         document.getElementById('windDir').textContent = data.windDirection ?? '—';
         document.getElementById('time').textContent = new Date().toLocaleTimeString();
         document.getElementById('error').textContent = '';

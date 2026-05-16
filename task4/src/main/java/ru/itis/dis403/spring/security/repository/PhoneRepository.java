@@ -12,4 +12,6 @@ import java.util.List;
 public interface PhoneRepository extends JpaRepository<Phone, Long> {
     @Query("select p from Phone p where p.number like :num ")
     List<Phone> getPhoneLike(@Param("num")String num);
+
+    Phone findByNumber(String number);
 }

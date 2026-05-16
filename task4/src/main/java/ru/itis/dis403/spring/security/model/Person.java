@@ -15,7 +15,7 @@ public class Person {
 
     protected String name;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(
             name = "person_phones",
             joinColumns = @JoinColumn(name = "person_id"),

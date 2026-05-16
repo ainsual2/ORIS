@@ -48,15 +48,21 @@ public class PersonController {
         if (newPhones != null) {
             for (String num : newPhones) {
                 if (num != null && !num.trim().isEmpty()) {
-                    Phone phone = new Phone();
-                    phone.setNumber(num.trim());
-                    // Добавляем связь с обеих сторон (полезно для Hibernate)
+                    String phoneNumber = num.trim();
+                    Phone phone = phoneService.findByNumber(phoneNumber);
+
+                    if (phone == null) {
+                        Phone newPhone = new Phone();
+                        newPhone.setNumber(phoneNumber);
+                        phone = phoneService.save(newPhone);
+                    }
+
                     person.getPhones().add(phone);
                 }
             }
         }
 
-        personService.save(person); // Теперь благодаря PERSIST всё сохранится в person_phones
+        personService.save(person);
         return "redirect:/persons/all";
     }
 

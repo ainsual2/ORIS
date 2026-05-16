@@ -1,9 +1,30 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        "http://w3.org">
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Тест</title>
+    <style>
+        #booking_table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        #booking_table th, #booking_table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        /* Стиль для всей строки, чтобы она выглядела кликабельной */
+        .booking-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        /* Подсветка при наведении */
+        .booking-row:hover {
+            background-color: #f0f8ff;
+        }
+    </style>
 </head>
 <body>
 
@@ -12,15 +33,25 @@
     <div><input name="password" type="password" placeholder="password"/></div>
     <div><input type="button" value="OK" onclick="login()"/></div>
 </form>
+<div id="error_box" style="display:none;color:red;margin-top:10px;"></div>
 
 <div id="content_section" style="display:none">
     <h3>Данные по бронированию в гостинице:</h3>
     <div>
-        <table id="booking_table"></table>
+        <table id="booking_table">
+            <thead>
+                <tr>
+                    <th>Комната</th>
+                    <th>Дата заезда</th>
+                    <th>Дата проживания</th>
+                </tr>
+            </thead>
+            <tbody id="booking_body"></tbody>
+        </table>
     </div>
 </div>
 
-<div id="booking_data" style="display:none; margin-top:20px;">
+<div id="booking_data" style="display:none; margin-top:20px; border-top: 2px solid #ccc; pt: 10px;">
     <h3>Редактирование бронирования</h3>
     <input type="hidden" id="edit_id"/>
     <div><label>Комната: <input type="text" id="edit_room"/></label></div>
@@ -35,76 +66,110 @@
 <script>
     let jwt_token;
 
-    function login() {
-        const formDataToJson = (formData) => JSON.stringify(Object.fromEntries(formData));
+    function showError(message) {
+        const box = document.getElementById('error_box');
+        box.style.display = 'block';
+        box.textContent = message;
+    }
+
+    function clearError() {
+        const box = document.getElementById('error_box');
+        box.style.display = 'none';
+        box.textContent = '';
+    }
+
+    async function login() {
+        clearError();
         const formElement = document.getElementById('form');
-        const jsonData = formDataToJson(new FormData(formElement));
-        console.log(jsonData);
+        const formData = new FormData(formElement);
+        const jsonData = JSON.stringify(Object.fromEntries(formData));
 
-        fetch('http://localhost:8090/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json;charset=utf-8' },
-            body: jsonData
-        })
-            .then(response => response.json())
-            .then(json => {
-                jwt_token = json.token;
-                document.getElementById("form").style.display = "none";
-                document.getElementById("content_section").style.display = "block";
-                show_content();
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json;charset=utf-8' },
+                body: jsonData
             });
-    }
 
-    function show_content() {
-        show_bookings();
-    }
+            const json = await response.json();
 
-    function show_bookings() {
-        fetch('http://localhost:8090/api/booking/allview', {
-            method: 'GET',
-            headers: { 'Authorization': 'Bearer ' + jwt_token }
-        })
-            .then(response => response.json())
-            .then(json => { make_booking_table(json); });
-    }
+            if (!response.ok || !json.token) {
+                showError(json.message || 'Не удалось войти.');
+                return;
+            }
 
-    function make_booking_table(data) {
-        let tbl = document.getElementById("booking_table");
-        tbl.innerHTML = "";
-        for (let i = 0; i < data.bookings.length; i++) {
-            let tr = document.createElement('tr');
-            let td_room = document.createElement('td');
-            td_room.innerHTML = "<span style='cursor:pointer;color:blue;text-decoration:underline' onclick='open_booking("
-                + data.bookings[i].id + ")'>" + data.bookings[i].room + "</span>";
-            tr.append(td_room);
-            let td_arrivaldate = document.createElement('td');
-            td_arrivaldate.innerHTML = data.bookings[i].arrivaldate;
-            tr.append(td_arrivaldate);
-            let td_stayingdate = document.createElement('td');
-            td_stayingdate.innerHTML = data.bookings[i].stayingdate;
-            tr.append(td_stayingdate);
-            tbl.append(tr);
+            jwt_token = json.token;
+            document.getElementById('form').style.display = 'none';
+            document.getElementById('content_section').style.display = 'block';
+            await show_bookings();
+        } catch (e) {
+            showError("Ошибка сети или сервера");
         }
     }
 
-    function open_booking(booking_id) {
-        fetch('http://localhost:8090/api/booking/get/' + booking_id, {
+    async function show_bookings() {
+        const response = await fetch('/api/booking/allview', {
             method: 'GET',
             headers: { 'Authorization': 'Bearer ' + jwt_token }
-        })
-            .then(response => response.json())
-            .then(json => { fill_booking(json); });
+        });
+
+        if (!response.ok) {
+            showError('Не удалось получить список бронирований.');
+            return;
+        }
+
+        const json = await response.json();
+        make_booking_table(json);
+    }
+
+        function make_booking_table(data) {
+            let tbody = document.getElementById('booking_body');
+            tbody.innerHTML = '';
+
+            const bookings = data.bookings || [];
+
+            bookings.forEach(booking => {
+                let tr = document.createElement('tr');
+                tr.className = 'booking-row';
+                tr.onclick = () => open_booking(booking.id);
+
+                <#noparse>
+                tr.innerHTML = `
+                    <td>${booking.room}</td>
+                    <td>${booking.arrivaldate}</td>
+                    <td>${booking.stayingdate}</td>
+                `;
+                </#noparse>
+
+                tbody.append(tr);
+            });
+        }
+
+
+    async function open_booking(booking_id) {
+        const response = await fetch('/api/booking/get/' + booking_id, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + jwt_token }
+        });
+
+        if (!response.ok) {
+            showError('Ошибка загрузки данных.');
+            return;
+        }
+
+        const json = await response.json();
+        fill_booking(json);
     }
 
     function fill_booking(data) {
-        document.getElementById("edit_id").value = data.id;
-        document.getElementById("edit_room").value = data.room || '';
-        document.getElementById("edit_arrivaldate").value = formatDate(data.arrivaldate);
-        document.getElementById("edit_stayingdate").value = formatDate(data.stayingdate);
-        document.getElementById("edit_departuredate").value = formatDate(data.departuredate);
-        document.getElementById("edit_name").value = data.name || '';
-        document.getElementById("edit_gender").value = data.gender || '';
-        document.getElementById("booking_data").style.display = "block";
+        document.getElementById('edit_id').value = data.id;
+        document.getElementById('edit_room').value = data.room || '';
+        document.getElementById('edit_arrivaldate').value = formatDate(data.arrivaldate);
+        document.getElementById('edit_stayingdate').value = formatDate(data.stayingdate);
+        document.getElementById('edit_departuredate').value = formatDate(data.departuredate);
+        document.getElementById('edit_name').value = data.name || '';
+        document.getElementById('edit_gender').value = data.gender || '';
+        document.getElementById('booking_data').style.display = 'block';
     }
 
     function formatDate(dateVal) {
@@ -112,32 +177,34 @@
         return new Date(dateVal).toISOString().split('T')[0];
     }
 
-    function saveBooking() {
-        const id = document.getElementById("edit_id").value;
+    async function saveBooking() {
+        const id = document.getElementById('edit_id').value;
         const body = {
             id: parseInt(id),
-            room: document.getElementById("edit_room").value,
-            arrivaldate: document.getElementById("edit_arrivaldate").value,
-            stayingdate: document.getElementById("edit_stayingdate").value,
-            departuredate: document.getElementById("edit_departuredate").value
+            room: document.getElementById('edit_room').value,
+            arrivaldate: document.getElementById('edit_arrivaldate').value,
+            stayingdate: document.getElementById('edit_stayingdate').value,
+            departuredate: document.getElementById('edit_departuredate').value
         };
 
-        fetch('http://localhost:8090/api/booking/update/' + id, {
+        const response = await fetch('/api/booking/update/' + id, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + jwt_token
             },
             body: JSON.stringify(body)
-        })
-            .then(response => response.json())
-            .then(json => {
-                alert("Сохранено!");
-                document.getElementById("booking_data").style.display = "none";
-                show_bookings();
-            });
-    }
+        });
 
+        if (!response.ok) {
+            showError('Ошибка при сохранении.');
+            return;
+        }
+
+        alert('Сохранено!');
+        document.getElementById('booking_data').style.display = 'none';
+        await show_bookings();
+    }
 </script>
 </body>
 </html>

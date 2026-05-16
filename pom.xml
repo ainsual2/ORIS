@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>nats_homework</module>
         <module>task1</module>
         <module>task2</module>
         <module>task3</module>
