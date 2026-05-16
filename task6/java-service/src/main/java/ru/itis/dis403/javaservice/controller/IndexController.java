@@ -1,6 +1,5 @@
-package main.java.ru.itis.dis403.javaservice.controller;
+package ru.itis.dis403.javaservice.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,18 +10,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequiredArgsConstructor
 public class IndexController {
 
     private final ImageService imageService;
     private final ImageServiceForNats imageServiceForNats;
+
+    public IndexController(ImageService imageService, ImageServiceForNats imageServiceForNats) {
+        this.imageService = imageService;
+        this.imageServiceForNats = imageServiceForNats;
+    }
 
     @GetMapping("/")
     public String index(Model model) {
         return "index";
     }
 
-    @GetMapping("/showimg")
+    @GetMapping({"/showimg", "/showing"})
     public String showImg(Model model) {
         List<String> imgs = imageService.getImgList();
         List<String> imgs2 = imageServiceForNats.getImgList();

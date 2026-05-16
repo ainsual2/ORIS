@@ -1,10 +1,10 @@
-package main.java.ru.itis.dis403.javaservice.service;
+package ru.itis.dis403.javaservice.service;
 
 import io.nats.client.Connection;
 import io.nats.client.Message;
 import io.nats.client.Nats;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
