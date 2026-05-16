@@ -1,4 +1,4 @@
-package main.java.ru.itis.dis403.javaservice;
+package ru.itis.dis403.javaservice;
 
 import java.io.IOException;
 import java.net.URI;

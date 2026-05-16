@@ -1,7 +1,6 @@
-package main.java.ru.itis.dis403.javaservice.service;
+package ru.itis.dis403.javaservice.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.View;
 
 import java.io.IOException;
 import java.net.URI;
